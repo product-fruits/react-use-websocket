@@ -1,10 +1,11 @@
 import { MutableRefObject } from 'react';
-import { sharedWebSockets } from './globals';
-import { Options, SendMessage, Subscriber, WebSocketLike } from './types';
-import { isEventSourceSupported, ReadyState, isReactNative } from './constants';
 import { attachListeners } from './attach-listener';
 import { attachSharedListeners } from './attach-shared-listeners';
-import { addSubscriber, removeSubscriber, hasSubscribers } from './manage-subscribers';
+import { isEventSourceSupported, isReactNative, ReadyState } from './constants';
+import { sharedWebSockets } from './globals';
+import { addSubscriber, hasSubscribers, removeSubscriber } from './manage-subscribers';
+import { Options, SendMessage, Subscriber, WebSocketLike } from './types';
+import { isWebSocket } from './util';
 
 //TODO ensure that all onClose callbacks are called
 
@@ -20,7 +21,7 @@ const cleanSubscribers = (
     if (!hasSubscribers(url)) {
       try {
         const socketLike = sharedWebSockets[url];
-        if (socketLike instanceof WebSocket) {
+        if (isWebSocket(socketLike)) {
           socketLike.onclose = (event: WebSocketEventMap['close']) => {
             if (optionsRef.current.onClose) {
               optionsRef.current.onClose(event);

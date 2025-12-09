@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { DEFAULT_OPTIONS, isEventSourceSupported, ReadyState, UNPARSABLE_JSON_OBJECT } from './constants';
 import { createOrJoinSocket } from './create-or-join';
@@ -7,13 +7,13 @@ import websocketWrapper from './proxy';
 import {
   Options,
   ReadyStateState,
-  SendMessage,
   SendJsonMessage,
-  WebSocketMessage,
+  SendMessage,
   WebSocketHook,
   WebSocketLike,
+  WebSocketMessage,
 } from './types';
-import { assertIsWebSocket } from './util';
+import { assertIsWebSocket, isEventSource } from './util';
 
 export const useWebSocket = <T = unknown>(
   url: string | (() => string | Promise<string>) | null,
@@ -52,7 +52,7 @@ export const useWebSocket = <T = unknown>(
   const stringifiedQueryParams = options.queryParams ? JSON.stringify(options.queryParams) : null;
 
   const sendMessage: SendMessage = useCallback((message, keep = true) => {
-    if (isEventSourceSupported && webSocketRef.current instanceof EventSource) {
+    if (isEventSourceSupported && isEventSource(webSocketRef.current)) {
       console.warn('Unable to send a message from an eventSource');
       return;
     }
@@ -70,7 +70,7 @@ export const useWebSocket = <T = unknown>(
   }, [sendMessage]);
 
   const getWebSocket = useCallback(() => {
-    if (optionsCache.current.share !== true || (isEventSourceSupported && webSocketRef.current instanceof EventSource)) {
+    if (optionsCache.current.share !== true || (isEventSourceSupported && isEventSource(webSocketRef.current))) {
       return webSocketRef.current;
     }
 

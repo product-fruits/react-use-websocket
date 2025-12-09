@@ -1,10 +1,11 @@
-import { sharedWebSockets } from './globals';
-import { DEFAULT_RECONNECT_LIMIT, DEFAULT_RECONNECT_INTERVAL_MS, ReadyState, isEventSourceSupported } from './constants';
-import { getSubscribers } from './manage-subscribers';
 import { MutableRefObject } from 'react';
-import { HeartbeatOptions, Options, SendMessage, WebSocketLike } from './types';
-import { setUpSocketIOPing } from './socket-io';
+import { DEFAULT_RECONNECT_INTERVAL_MS, DEFAULT_RECONNECT_LIMIT, ReadyState, isEventSourceSupported } from './constants';
+import { sharedWebSockets } from './globals';
 import { heartbeat } from './heartbeat';
+import { getSubscribers } from './manage-subscribers';
+import { setUpSocketIOPing } from './socket-io';
+import { HeartbeatOptions, Options, SendMessage, WebSocketLike } from './types';
+import { isEventSource, isWebSocket } from './util';
 
 const bindMessageHandler = (
   webSocketInstance: WebSocketLike,
@@ -57,11 +58,11 @@ const bindOpenHandler = (
 
       let onMessageCb: () => void;
 
-      if (heartbeatOptions && webSocketInstance instanceof WebSocket) {
+      if (heartbeatOptions && isWebSocket(webSocketInstance)) {
         subscriber.lastMessageTime.current = Date.now();
       }
     });
-    if (heartbeatOptions && webSocketInstance instanceof WebSocket) {
+    if (heartbeatOptions && isWebSocket(webSocketInstance)) {
       heartbeat(webSocketInstance, subscribers.map(subscriber => subscriber.lastMessageTime), typeof heartbeatOptions === 'boolean' ? undefined : heartbeatOptions,);
     }
   };
@@ -71,7 +72,7 @@ const bindCloseHandler = (
   webSocketInstance: WebSocketLike,
   url: string,
 ) => {
-  if (webSocketInstance instanceof WebSocket) {
+  if (isWebSocket(webSocketInstance)) {
     webSocketInstance.onclose = (event: WebSocketEventMap['close']) => {
       getSubscribers(url).forEach(subscriber => {
         if (subscriber.optionsRef.current.onClose) {
@@ -117,7 +118,7 @@ const bindErrorHandler = (
       if (subscriber.optionsRef.current.onError) {
         subscriber.optionsRef.current.onError(error);
       }
-      if (isEventSourceSupported && webSocketInstance instanceof EventSource) {
+      if (isEventSourceSupported && isEventSource(webSocketInstance)) {
         subscriber.optionsRef.current.onClose && subscriber.optionsRef.current.onClose({
           ...error,
           code: 1006,
@@ -128,7 +129,7 @@ const bindErrorHandler = (
         subscriber.setReadyState(ReadyState.CLOSED);
       }
     });
-    if (isEventSourceSupported && webSocketInstance instanceof EventSource) {
+    if (isEventSourceSupported && isEventSource(webSocketInstance)) {
       webSocketInstance.close();
     }
   };

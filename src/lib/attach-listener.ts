@@ -1,14 +1,14 @@
 import { MutableRefObject } from 'react';
-import { setUpSocketIOPing } from './socket-io';
-import { heartbeat } from './heartbeat';
 import {
-  DEFAULT_RECONNECT_LIMIT,
   DEFAULT_RECONNECT_INTERVAL_MS,
+  DEFAULT_RECONNECT_LIMIT,
   ReadyState,
   isEventSourceSupported,
 } from './constants';
+import { heartbeat } from './heartbeat';
+import { setUpSocketIOPing } from './socket-io';
 import { Options, SendMessage, WebSocketLike } from './types';
-import { assertIsWebSocket } from './util';
+import { assertIsWebSocket, isEventSource, isWebSocket } from './util';
 
 export interface Setters {
   setLastMessage: (message: WebSocketEventMap['message']) => void;
@@ -55,7 +55,7 @@ const bindOpenHandler = (
     reconnectCount.current = 0;
     setReadyState(ReadyState.OPEN);
     //start heart beat here
-    if (optionsRef.current.heartbeat && webSocketInstance instanceof WebSocket) {
+    if (optionsRef.current.heartbeat && isWebSocket(webSocketInstance)) {
       const heartbeatOptions =
         typeof optionsRef.current.heartbeat === "boolean"
           ? undefined
@@ -74,7 +74,7 @@ const bindCloseHandler = (
   reconnect: () => void,
   reconnectCount: MutableRefObject<number>,
 ) => {
-  if (isEventSourceSupported && webSocketInstance instanceof EventSource) {
+  if (isEventSourceSupported && isEventSource(webSocketInstance)) {
     return () => { };
   }
   assertIsWebSocket(webSocketInstance, optionsRef.current.skipAssert);
@@ -115,7 +115,7 @@ const bindErrorHandler = (
 
   webSocketInstance.onerror = (error: WebSocketEventMap['error']) => {
     optionsRef.current.onError && optionsRef.current.onError(error);
-    if (isEventSourceSupported && webSocketInstance instanceof EventSource) {
+    if (isEventSourceSupported && isEventSource(webSocketInstance)) {
       optionsRef.current.onClose && optionsRef.current.onClose({
         ...error,
         code: 1006,
