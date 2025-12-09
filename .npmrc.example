@@ -1,0 +1,13 @@
+# GitHub Packages NPM Registry Configuration
+# Copy this file to .npmrc for local publishing
+# 
+# To publish locally, you'll need a GitHub Personal Access Token (PAT) with 'write:packages' permission
+# Create one at: https://github.com/settings/tokens
+#
+# Then add it to your .npmrc file (or use npm login):
+# @product-fruits:registry=https://npm.pkg.github.com
+# //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+
+@product-fruits:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+

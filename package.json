@@ -1,5 +1,5 @@
 {
-  "name": "react-use-websocket",
+  "name": "@product-fruits/react-use-websocket",
   "version": "4.13.1",
   "description": "React Hook for WebSocket communication",
   "main": "./dist/index.js",
@@ -11,11 +11,15 @@
     "test": "cross-env node_modules/.bin/jest --verbose --no-cache",
     "clear-dist": "cross-env rm -rf dist/",
     "compile": "cross-env node_modules/.bin/tsc -p .",
-    "push": "cross-env npm run test && npm run clear-dist && npm run compile && npm publish"
+    "push": "cross-env npm run test && npm run clear-dist && npm run compile && npm publish",
+    "publish:github": "cross-env npm run test && npm run clear-dist && npm run compile && npm publish --registry=https://npm.pkg.github.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/robtaussig/react-use-websocket.git"
+    "url": "git+https://github.com/product-fruits/react-use-websocket.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "types": "./dist/index.d.ts",
   "devDependencies": {
@@ -73,6 +77,5 @@
   "bugs": {
     "url": "https://github.com/robtaussig/react-use-websocket/issues"
   },
-  "homepage": "https://github.com/robtaussig/react-use-websocket#readme",
-  "packageManager": "yarn@4.5.0"
+  "homepage": "https://github.com/robtaussig/react-use-websocket#readme"
 }
